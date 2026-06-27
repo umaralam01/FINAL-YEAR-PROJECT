@@ -87,10 +87,3 @@ Main Project Folder
 ├── README.md                                # Readme file for the project overview and instructions
 ```
 
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request if you encounter any bugs or have suggestions for improvements.
-
-## License
-
-This project is licensed under the Apache License 2.0 License - see the [LICENSE](LICENSE) file for details.
