@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <title>Model Metrics — FaceTrack</title>
+  <style>
+    :root {
+      --cyan: #00f5ff;
+      --cyan-dim: #00c8d4;
+      --cyan-glow: rgba(0, 245, 255, 0.15);
+      --dark: #020b14;
+      --dark-card: rgba(2, 18, 30, 0.92);
+      --border: rgba(0, 245, 255, 0.2);
+      --border-bright: rgba(0, 245, 255, 0.5);
+      --text: #cce8f0;
+      --text-dim: #5a8fa0;
+      --blue:   #3498db;
+      --orange: #ffb800;
+      --green:  #00ff88;
+      --red:    #ff3860;
+      --purple: #bf5fff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'Rajdhani', sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse { 0%,100%{opacity:.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.1)} }
+    @keyframes countUp { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+    /* NAVBAR */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(2,10,20,0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .nav-brand {
+      font-family: 'Orbitron', monospace;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--cyan);
+      text-decoration: none;
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px var(--cyan);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-brand .dot { width: 8px; height: 8px; background: var(--cyan); border-radius: 50%; animation: pulse 2s infinite; }
+    .back-link {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .back-link:hover { color: var(--cyan); border-color: var(--border-bright); background: var(--cyan-glow); }
+
+    /* PAGE HEADER */
+    .page-header {
+      text-align: center;
+      padding: 52px 32px 36px;
+      animation: fadeSlideIn 0.7s ease both;
+    }
+    .page-header h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(20px, 3.5vw, 40px);
+      font-weight: 900;
+      letter-spacing: 5px;
+      color: #fff;
+    }
+    .page-header h1 span { color: var(--cyan); text-shadow: 0 0 25px var(--cyan); }
+    .page-header p {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: var(--text-dim);
+      margin-top: 10px;
+      text-transform: uppercase;
+    }
+    .header-line {
+      width: 160px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      margin: 18px auto 0;
+    }
+
+    /* CONTENT */
+    .content {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 32px 60px;
+      animation: fadeSlideIn 0.8s ease 0.15s both;
+    }
+
+    /* METRICS GRID */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .metric-card {
+      background: var(--dark-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+      animation: countUp 0.5s ease both;
+    }
+    .metric-card:nth-child(1) { animation-delay: 0.1s; border-color: rgba(52,152,219,0.4); }
+    .metric-card:nth-child(2) { animation-delay: 0.2s; border-color: rgba(255,184,0,0.4); }
+    .metric-card:nth-child(3) { animation-delay: 0.3s; border-color: rgba(0,255,136,0.4); }
+    .metric-card:nth-child(4) { animation-delay: 0.4s; border-color: rgba(255,56,96,0.4); }
+    .metric-card:nth-child(5) { animation-delay: 0.5s; border-color: rgba(191,95,255,0.4); }
+
+    .metric-card:hover { transform: translateY(-4px); }
+    .metric-card:nth-child(1):hover { box-shadow: 0 8px 30px rgba(52,152,219,0.25); }
+    .metric-card:nth-child(2):hover { box-shadow: 0 8px 30px rgba(255,184,0,0.25); }
+    .metric-card:nth-child(3):hover { box-shadow: 0 8px 30px rgba(0,255,136,0.25); }
+    .metric-card:nth-child(4):hover { box-shadow: 0 8px 30px rgba(255,56,96,0.25); }
+    .metric-card:nth-child(5):hover { box-shadow: 0 8px 30px rgba(191,95,255,0.25); }
+
+    .metric-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .metric-card:nth-child(1)::before { background: var(--blue); }
+    .metric-card:nth-child(2)::before { background: var(--orange); }
+    .metric-card:nth-child(3)::before { background: var(--green); }
+    .metric-card:nth-child(4)::before { background: var(--red); }
+    .metric-card:nth-child(5)::before { background: var(--purple); }
+
+    .metric-icon {
+      font-size: 28px !important;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .metric-card:nth-child(1) .metric-icon { color: var(--blue); }
+    .metric-card:nth-child(2) .metric-icon { color: var(--orange); }
+    .metric-card:nth-child(3) .metric-icon { color: var(--green); }
+    .metric-card:nth-child(4) .metric-icon { color: var(--red); }
+    .metric-card:nth-child(5) .metric-icon { color: var(--purple); }
+
+    .metric-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .metric-card:nth-child(1) .metric-value { color: var(--blue); text-shadow: 0 0 15px rgba(52,152,219,0.5); }
+    .metric-card:nth-child(2) .metric-value { color: var(--orange); text-shadow: 0 0 15px rgba(255,184,0,0.5); }
+    .metric-card:nth-child(3) .metric-value { color: var(--green); text-shadow: 0 0 15px rgba(0,255,136,0.5); }
+    .metric-card:nth-child(4) .metric-value { color: var(--red); text-shadow: 0 0 15px rgba(255,56,96,0.5); }
+    .metric-card:nth-child(5) .metric-value { color: var(--purple); text-shadow: 0 0 15px rgba(191,95,255,0.5); }
+
+    /* CHART SECTION */
+    .chart-section {
+      background: var(--dark-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .chart-header {
+      padding: 18px 24px;
+      background: linear-gradient(135deg, rgba(0,245,255,0.08), rgba(0,100,150,0.05));
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .chart-header-left { display: flex; align-items: center; gap: 12px; }
+    .chart-header h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #fff;
+      text-transform: uppercase;
+    }
+    .chart-header .material-icons { color: var(--cyan); }
+
+    .save-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: rgba(0,245,255,0.1);
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      color: var(--cyan);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .save-btn:hover {
+      background: rgba(0,245,255,0.2);
+      box-shadow: 0 0 20px rgba(0,245,255,0.2);
+      color: #fff;
+    }
+    .save-btn .material-icons { font-size: 16px; }
+
+    .chart-body { padding: 28px; text-align: center; }
+    .chart-body img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      .content { padding: 0 16px 40px; }
+      nav { padding: 0 16px; }
+      .metrics-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <a class="nav-brand" href="/">
+      <span class="dot"></span>
+      FACETRACK
+    </a>
+    <a class="back-link" href="/">
+      <i class="material-icons" style="font-size:16px">arrow_back</i>
+      Back to Home
+    </a>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <h1>Model <span>Metrics</span></h1>
+    <p>Recognition Engine · Performance Report</p>
+    <div class="header-line"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- METRICS GRID -->
+    <div class="metrics-grid">
+
+      <div class="metric-card">
+        <i class="material-icons metric-icon">analytics</i>
+        <div class="metric-label">Accuracy</div>
+        <div class="metric-value">{{ metrics.accuracy }}</div>
+      </div>
+
+      <div class="metric-card">
+        <i class="material-icons metric-icon">precision_manufacturing</i>
+        <div class="metric-label">Precision</div>
+        <div class="metric-value">{{ metrics.precision }}</div>
+      </div>
+
+      <div class="metric-card">
+        <i class="material-icons metric-icon">replay</i>
+        <div class="metric-label">Recall</div>
+        <div class="metric-value">{{ metrics.recall }}</div>
+      </div>
+
+      <div class="metric-card">
+        <i class="material-icons metric-icon">score</i>
+        <div class="metric-label">F1 Score</div>
+        <div class="metric-value">{{ metrics.f1_score }}</div>
+      </div>
+
+      <div class="metric-card">
+        <i class="material-icons metric-icon">correlation</i>
+        <div class="metric-label">MCC</div>
+        <div class="metric-value">{{ metrics.matthews_cc }}</div>
+      </div>
+
+    </div>
+
+    <!-- CHART SECTION -->
+    <div class="chart-section">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <i class="material-icons">bar_chart</i>
+          <h2>Performance Graph</h2>
+        </div>
+        <button class="save-btn" id="saveImageButton">
+          <i class="material-icons">download</i>
+          Save Image
+        </button>
+      </div>
+      <div class="chart-body">
+        <img id="imageToSave" src="data:image/png;base64,{{ plot_url }}" alt="Metrics Performance Plot" />
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    FACETRACK SDPE &mdash; MODEL PERFORMANCE METRICS
+  </footer>
+
+  <script>
+    document.getElementById('saveImageButton').addEventListener('click', function () {
+      var image = document.getElementById('imageToSave');
+      var link = document.createElement('a');
+      link.href = image.src;
+      link.download = 'metrics_plot.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  </script>
+
+</body>
+</html>
